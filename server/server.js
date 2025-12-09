@@ -116,7 +116,7 @@ app.delete("/api/tasks/:id", async (req, res) => {
       return res.status(404).json("Task not found");
     }
 
-    res.json(deletedTask);
+    res.json({"message": "Task deleted successfully", "task": deletedTask});
   }
   catch (err){
     res.status(500).json({message: err.message});
@@ -125,7 +125,35 @@ app.delete("/api/tasks/:id", async (req, res) => {
 
 // TODO: Add your Session routes here
 // POST /api/sessions
+app.post("/api/sessions", async (req, res) => {
+  try{
+    const createdSession = new Session({
+      taskId: req.body.taskId,
+      duration: req.body.duration,
+      startTime: req.body.startTime,
+      completed: req.body.completed
+    });
+
+    const savedSession = await createdSession.save();
+
+    res.status(201).json({message: "Session created", session: savedSession})
+  }
+  catch (err){
+    res.status(400).json({message: err.message})
+  }
+});
+
 // GET /api/sessions
+app.get("/api/sessions", async (req, res) =>{
+  try{
+    const sessions = await Session.find().populate('taskId');
+
+    res.json(sessions);
+  }
+  catch (err){
+    res.status(500).json({message: err.message})
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
