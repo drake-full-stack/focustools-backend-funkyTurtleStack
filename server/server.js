@@ -18,6 +18,14 @@ app.use(
 )
 */
 
+// Import Routes
+const taskRoutes = require("./routes/tasks");
+const sessionRoutes = require("./routes/sessions");
+
+//Use routes
+app.use("/tasks", taskRoutes);
+app.use("/sessions", sessionRoutes);
+
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -39,120 +47,6 @@ app.get("/", (req, res) => {
       sessions: "/api/sessions",
     },
   });
-});
-
-// POST /api/tasks
-app.post("/api/tasks", async (req, res) => {
-  try{
-    const task = new Task({
-      title: req.body.title
-    });
-
-    const savedTask = await task.save();
-    res.status(201).json(savedTask);
-  }
-  catch (err){
-    res.status(400).json({message: err.message});
-  }
-});
-
-// GET /api/tasks
-app.get("/api/tasks", async (req, res) => {
-  try{
-    const tasks = await Task.find();
-    res.json(tasks);
-  }
-  catch (err){
-    res.status(500).json({message: err.message});
-  }
-});
-
-// GET /api/tasks/:id
-app.get("/api/tasks/:id", async (req, res) => {
-  try{
-    const specificTask = await Task.findById(req.params.id);
-    
-    if(!specificTask){
-      return res.status(404).json({message: "Task not found"});
-    }
-
-    res.json(specificTask);
-  }
-  catch (err){
-    res.status(500).json({message: err.message});
-  }
-});
-
-// PUT /api/tasks/:id
-app.put("/api/tasks/:id", async (req, res) => {
-  try{
-    const changedTask = await Task.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {new: true}
-    );
-
-    if(!changedTask){
-      return res.status(404).json("Task not found");
-    }
-
-    res.json(changedTask);
-  }
-  catch (err){
-    if(err.name === "ValidationError"){
-      return res.status(400).json({message: err.message});
-    }
-
-    res.status(500).json({message: err.message});
-  }
-});
-
-// DELETE /api/tasks/:id
-app.delete("/api/tasks/:id", async (req, res) => {
-  try{
-    const deletedTask = await Task.findByIdAndDelete(req.params.id);
-
-    if(!deletedTask){
-      return res.status(404).json("Task not found");
-    }
-
-    res.json({"message": "Task deleted successfully", "task": deletedTask});
-  }
-  catch (err){
-    res.status(500).json({message: err.message});
-  }
-});
-
-// TODO: Add your Session routes here
-// POST /api/sessions
-app.post("/api/sessions", async (req, res) => {
-  try{
-    const createdSession = new Session({
-      taskId: req.body.taskId,
-      duration: req.body.duration,
-      startTime: req.body.startTime,
-      completed: req.body.completed
-    });
-
-    const savedSession = await createdSession.save();
-
-    res.status(201).json({message: "Session created", session: savedSession})
-  }
-  catch (err){
-    res.status(400).json({message: err.message})
-  }
-});
-
-// GET /api/sessions
-app.get("/api/sessions", async (req, res) =>{
-  try{
-    const sessions = await Session.find().populate('taskId');
-
-    res.json(sessions);
-  }
-  catch (err){
-    res.status(500).json({message: err.message})
-  }
 });
 
 app.listen(PORT, () => {
