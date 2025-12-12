@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 
 //creating the main server object
 const app = express();
@@ -10,13 +11,23 @@ const PORT = process.env.PORT || 3001;
 // Middleware (allows json requests to be used)
 app.use(express.json());
 
-/*
+// Middleware logs requests
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
+// allow cross origin requests
+app.use(cors());
+
 app.use(
-  cors({}
-    origin: process.env.CLIENT_ORIGIN,
+  cors({
+    origin: [
+      "http://localhost:5173",               // Vite local dev
+      process.env.CLIENT_ORIGIN,            // Netlify URL
+    ],
   })
-)
-*/
+);
 
 // Import Routes
 const taskRoutes = require("./routes/tasks");
